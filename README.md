@@ -4,11 +4,11 @@ A small collection of various homemade or modified scripts that may prove useful
 
 Version 1.5 is the current version.
 
-## count_ip.php
+## satisfied.php
 
 This is a small php script that takes two or three files which contain IP addresses and counts each reoccurance of that IP in those files. This is designed to make sure that the scope has been fully scanned. Useful for ITHC and PCI jobs.
 
-:~/tools$ php count_ip.php original-scope.txt nessus-results.txt
+:~/tools$ php satisfied.php original-scope.txt nessus-results.txt
 
 Array
 (
