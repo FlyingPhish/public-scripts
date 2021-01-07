@@ -2,7 +2,6 @@
 
 A small collection of various homemade or modified scripts that may prove useful to people. Nothing amazing or ground-breaking but useful.
 
-Version 1.5 is the current version.
 
 ## satisfied.php
 
@@ -26,7 +25,6 @@ A very simple script that takes greps IPs from a file or piped output, sorts it 
 gips.sh file.txt
 
 nmap x x x | gips.sh
-
 
 
 ## Advisory
