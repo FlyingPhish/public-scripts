@@ -26,6 +26,11 @@ gips.sh file.txt
 
 nmap x x x | gips.sh
 
+## no_prison
+
+A small ruby script that creates a file with a list of IPs for your scope/test/assessment. You give it two files with IP addresses w/ CIDR notations, one which has in-scope IPs and the other with ones out of scope (if they intertwine). This then creates a final file that has all the IPs in scope, its great if you CANNOT even ping or touch an out of scope IP.
+
+ruby no_prison.rb inscope.txt outscope.txt
 
 ## Advisory
 
