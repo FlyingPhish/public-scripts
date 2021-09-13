@@ -1,6 +1,6 @@
 #!/bin/bash
 # USAGE
-# wfuzz-loop.sh path/to/wordlist https://mytarget.com
+# wfuzz-loop.sh path/to/wordlist urls.txt
 
 printf "\nRunning WFuzz with word list $1 against $2. Results saved to wfuzz-list-output.txt"
 echo ""
