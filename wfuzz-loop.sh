@@ -1,6 +1,6 @@
 #!/bin/bash
 # USAGE
-# wfuzz-loop.sh path/to/wordlist urls.txt
+# wfuzz-loop.sh path/to/wordlist urls.txt !!! URLS IN FILE DO NOT NEED /FUZZ
 
 printf "\nRunning WFuzz with word list $1 against $2. Results saved to wfuzz-list-output.txt"
 echo ""
