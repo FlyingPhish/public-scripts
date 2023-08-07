@@ -61,7 +61,7 @@ A small ruby script that creates a file with a list of IPs for your scope/test/a
 
 ```ruby no_prison.rb inscope.txt outscope.txt```
 
-## nwfuzz-loop.sh
+## wfuzz-loop.sh
 
 Very barebones bash loop to run wfuzz against a list of URLs.
 
