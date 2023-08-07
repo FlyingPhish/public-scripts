@@ -39,6 +39,19 @@ This small PowerShell script uses AZ CLI to get a list of resources for each env
 
 ```
 
+## Scaffolding.ps1
+
+I use this script as a right click shortcut when in a parent directory to create an assessment structure.
+
+You have to create a reg edit such as
+
+Computer\HKEY_CLASSES_ROOT\Directory\Background\shell\Create Scaffolding\Command with a string value 
+Name = (Default)
+Value data = pwsh.exe C:\Users\path\to\file\scaffolding.ps1
+
+Please update the script to use a file path you and naming convention you want.
+
+
 ## satisfied.php
 
 This is a small php script that takes two or three files which contain IP addresses and counts each reoccurance of that IP in those files. This is designed to make sure that the scope has been fully scanned. Useful for ITHC and PCI jobs.
