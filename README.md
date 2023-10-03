@@ -80,6 +80,15 @@ Very barebones bash loop to run wfuzz against a list of URLs.
 
 ```wfuzz-loop.sh path/to/wordlist path/to/file/with/urls.txt```
 
+## Open-DBeaver.ps1
+Script to be used in right click context menu for opening a db (tested with sqlite) file and connect to it. Created as you manually need to connect to local db files.
+
+1. Save the script
+2. Edit your dbeaver-cli path
+3. Create a reg key at the following location (Computer\HKEY_LOCAL_MACHINE\SOFTWARE\Classes\*\shell\) named (OpenDBeaver) and modify the default string value to "Open with DBeaver"
+4. Create a reg key named Command and modify the default string value to pwsh.exe -file "X:\Path\To\Open-DBeaver.ps1" -filePath "%1"
+5. Then SHIFT + right click file -> Open with DBeaver.
+
 ## Advisory
 
 All the scripts listed in this repository should only be used for authorized penetration testing and/or educational purposes. Any misuse of this software will not be the responsibility of the author or of any other collaborator. Use it on your own networks and/or systems with the network owner's permission. Furthermore, please use at your own risk as the author or any other collaborator are not responsible for any issues or trouble caused!
