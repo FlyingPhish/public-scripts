@@ -2,6 +2,22 @@
 
 A small collection of various homemade or modified scripts that may prove useful to people. Nothing amazing or ground-breaking but useful.
 
+## .bash_functions && .bash_aliases
+My bash func and aliases files that include some of tools in this repo and more! My favourites are:
+- shell_help - lists all aliases and functions
+- extract_urls
+- replace_string
+- string-replace - has options for new-line, tab, space
+- count_string
+- extract
+- mkvenv - makes a .venv env
+- venv - activates venv
+- jwt-decode - decodes JWTs
+- jwt-decode-info - provides more info like the creation time, time difference and expiry date
+- gips - function version of gips that greps IPs, sorts and removes dupes
+- orderips - function version of orderips that sorts IPs
+- dockerc-* lots of aliases for docker
+- 
 ## gips.sh
 
 A very simple script that takes greps IPs from a file or piped output, sorts it and removes any duplicates. Useful for grabbing IPs from a tool output or a mixed format scope.
