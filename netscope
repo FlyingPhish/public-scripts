@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# Network WHOIS Recon Tool
+# Description: Parses a file containing IPs, CIDRs, and FQDNs, then runs WHOIS on resolved IPs.
+# Usage:
+#   netscope -company "Contoso" -input scope.txt
+#   cat scope.txt | netscope -company "Contoso"
+
+set -euo pipefail
+
+# GLOBALS
+COMPANY_NAME=""
+INPUT_FILE=""
+SCRIPT_NAME=$(basename "$0")
+
+# Show help
+show_help() {
+    cat <<EOF
+Usage:
+  $SCRIPT_NAME -company "Company Name" [-input filename]
+  cat targets.txt | $SCRIPT_NAME -company "Company Name"
+
+Options:
+  -company     Company name to match in WHOIS output
+  -input       File with list of targets (IPs, CIDRs, FQDNs)
+  -help        Show this help
+
+EOF
+}
+
+# Parse args
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -company)
+                COMPANY_NAME="$2"
+                shift 2
+                ;;
+            -input)
+                INPUT_FILE="$2"
+                shift 2
+                ;;
+            -help|--help|-h)
+                show_help
+                exit 0
+                ;;
+            *)
+                printf "Unknown option: %s\n" "$1" >&2
+                show_help >&2
+                exit 1
+                ;;
+        esac
+    done
+
+    if [[ -z "$COMPANY_NAME" ]]; then
+        printf "Missing required parameter: -company\n" >&2
+        show_help >&2
+        exit 1
+    fi
+}
+
+# Check dependencies
+check_dependencies() {
+    local deps=("dig" "whois")
+    local missing=()
+
+    for dep in "${deps[@]}"; do
+        if ! command -v "$dep" >/dev/null 2>&1; then
+            missing+=("$dep")
+        fi
+    done
+
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        printf "Missing required dependencies: %s\n" "${missing[*]}" >&2
+        printf "Install with: sudo apt install %s\n" "${missing[*]}" >&2
+        exit 1
+    fi
+}
+
+# Read input from file or stdin
+get_targets() {
+    if [[ -n "$INPUT_FILE" ]]; then
+        if [[ ! -f "$INPUT_FILE" ]]; then
+            printf "Input file not found: %s\n" "$INPUT_FILE" >&2
+            return 1
+        fi
+        cat "$INPUT_FILE"
+    else
+        cat
+    fi
+}
+
+# Normalize target to IP address
+normalize_to_ip() {
+    local input="$1"
+    local ip
+
+    # Validate and extract from CIDR
+    if [[ "$input" =~ ^([0-9]{1,3}(\.[0-9]{1,3}){3})\/[0-9]{1,2}$ ]]; then
+        ip="${BASH_REMATCH[1]}"
+        printf "%s\n" "$ip"
+        return
+    fi
+
+    # Validate raw IP
+    if [[ "$input" =~ ^([0-9]{1,3}(\.[0-9]{1,3}){3})$ ]]; then
+        printf "%s\n" "$input"
+        return
+    fi
+
+    # Resolve FQDN
+    local resolved
+    resolved=$(dig +short A "$input" | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n1)
+    if [[ -n "$resolved" ]]; then
+        printf "%s\n" "$resolved"
+        return
+    fi
+
+    printf "Failed to resolve '%s'\n" "$input" >&2
+    return 1
+}
+
+# Run WHOIS and extract company info
+run_whois_lookup() {
+    local ip="$1"
+    local output clean_name match_lines extended_lines
+
+    if ! output=$(whois "$ip" 2>/dev/null); then
+        printf "WHOIS lookup failed for IP: %s\n" "$ip" >&2
+        return 1
+    fi
+
+    printf "==== WHOIS for %s ====\n" "$ip"
+
+    clean_name=$(printf "%s" "$COMPANY_NAME" | sed -E 's/\s+(LLC|INC|LTD|CORP|CORPORATION|LIMITED|LLP)\.?$//I' | tr '[:upper:]' '[:lower:]')
+
+    match_lines=$(printf "%s\n" "$output" | grep -iF "$clean_name" || true)
+
+    if [[ -n "$match_lines" ]]; then
+        printf "✔ Company match: %s\n" "$COMPANY_NAME"
+        printf "→ Matching WHOIS lines:\n"
+        printf "%s\n" "$match_lines"
+    else
+        printf "✘ Company match: not found\n"
+    fi
+
+    printf "\n→ Summary WHOIS Info:\n"
+
+    printf "%s\n" "$output" | grep -Ei '^(NetRange|CIDR|inetnum|OrgName|netname|country|descr|OrgId|owner|responsible|created|changed|source|remarks):' || true
+
+    printf "\n→ Extended Network Info:\n"
+
+    extended_lines=$(printf "%s\n" "$output" | grep -Ei '^network:(ID|IP-Network|Org-Name|Street-Address|City|State|Country|Postal-Code|Updated):')
+    
+    if [[ -n "$extended_lines" ]]; then
+        printf "%s\n" "$extended_lines"
+    else
+        printf "No extended network fields found.\n"
+    fi
+
+    printf "\n"
+}
+
+
+# Process all targets
+process_targets() {
+    local raw
+    local ip
+    local line=0
+
+    while IFS= read -r raw || [[ -n "$raw" ]]; do
+        line=$((line+1))
+
+        raw=$(printf "%s" "$raw" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        [[ -z "$raw" || "$raw" =~ ^# ]] && continue
+
+        # Escape printf input to prevent errors
+        if [[ "$raw" == -* ]]; then
+            raw="./$raw"
+        fi
+
+        # printf "---- Line #%s: %s ----\n" "$line" "${raw//%/%%}"
+
+        if ip=$(normalize_to_ip "$raw"); then
+            run_whois_lookup "$ip"
+        else
+            printf "Skipping: Could not normalize '%s' to IP\n\n" "$raw" >&2
+        fi
+
+        sleep 0.5
+    done
+}
+
+
+main() {
+    parse_args "$@"
+    check_dependencies
+
+    printf "Network WHOIS Recon\n"
+    printf "Target company: %s\n" "$COMPANY_NAME"
+    printf "========================================\n\n"
+
+    if ! get_targets | process_targets; then
+        printf "Error processing targets\n" >&2
+        exit 1
+    fi
+
+    printf "Done.\n"
+}
+
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi
