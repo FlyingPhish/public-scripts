@@ -1,0 +1,14 @@
+Title: Application Security Assessment
+Days: 
+
+Title: External Infrastructure Assessment
+Days: 
+
+Title: Internal Infrastructure Assessment
+Days: 
+
+Title: Microsoft Cloud Security Review
+Days: 
+
+Title: Simulated Breach Assessment - VPN
+Days: 
